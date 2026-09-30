@@ -1005,6 +1005,132 @@ body {
   margin-top: 6px;
 }
 
+
+/* ── Scan Result HUD ─────────────────────────────────────────────────── */
+.scan-hud {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92%;
+  max-width: 440px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  z-index: 50;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  animation: hudSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes hudSlideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -16px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.hud-success {
+  background: rgba(12, 38, 28, 0.88);
+  border: 1px solid rgba(0, 229, 160, 0.45);
+}
+
+.hud-warning {
+  background: rgba(43, 27, 10, 0.88);
+  border: 1px solid rgba(255, 179, 0, 0.45);
+}
+
+.hud-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.hud-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.hud-success .hud-badge {
+  background: rgba(0, 229, 160, 0.2);
+  color: var(--accent-start);
+}
+
+.hud-warning .hud-badge {
+  background: rgba(255, 179, 0, 0.2);
+  color: #ffb300;
+}
+
+.hud-time {
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: var(--font-mono, monospace);
+}
+
+.hud-main {
+  margin-bottom: 8px;
+}
+
+.hud-username {
+  font-size: 1.35rem;
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.05em;
+}
+
+.hud-username strong {
+  color: var(--accent-start);
+  text-shadow: 0 0 12px rgba(0, 229, 160, 0.4);
+}
+
+.hud-not-found {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffb300;
+}
+
+.hud-raw {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.76rem;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.hud-raw-title {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.hud-raw-text {
+  font-family: var(--font-mono, monospace);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hud-raw-conf {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.7rem;
+}
+
 /* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .shutter-btn {
@@ -1017,4 +1143,5 @@ body {
     height: 58px;
   }
 }
+
 

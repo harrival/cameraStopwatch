@@ -34,12 +34,15 @@ export async function captureFrame(videoEl: HTMLVideoElement): Promise<{
   imageUri: string;
   blob: Blob;
 }> {
+  const width = videoEl.videoWidth || 1920;
+  const height = videoEl.videoHeight || 1080;
+
   const canvas = document.createElement('canvas');
-  canvas.width = videoEl.videoWidth;
-  canvas.height = videoEl.videoHeight;
+  canvas.width = width;
+  canvas.height = height;
 
   const ctx = canvas.getContext('2d')!;
-  ctx.drawImage(videoEl, 0, 0);
+  ctx.drawImage(videoEl, 0, 0, width, height);
 
   const blob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
@@ -54,6 +57,34 @@ export async function captureFrame(videoEl: HTMLVideoElement): Promise<{
 }
 
 /**
+ * Captures a photo via file input picker (fallback / standalone capture).
+ */
+export async function capturePhoto(): Promise<{ imageUri: string; blob: Blob }> {
+  return new Promise((resolve, reject) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) {
+        reject(new Error('No photo selected'));
+        return;
+      }
+      const imageUri = URL.createObjectURL(file);
+      resolve({ imageUri, blob: file });
+    };
+
+    input.oncancel = () => {
+      reject(new Error('Photo capture cancelled'));
+    };
+
+    input.click();
+  });
+}
+
+/**
  * Stops the active camera stream.
  */
 export function stopCamera(): void {
@@ -62,3 +93,4 @@ export function stopCamera(): void {
     activeStream = null;
   }
 }
+

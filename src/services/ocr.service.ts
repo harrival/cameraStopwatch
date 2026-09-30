@@ -32,12 +32,13 @@ export async function getWorker(): Promise<Tesseract.Worker> {
 }
 
 /**
+/**
  * Runs OCR on an image source (canvas, image URL, blob, etc.)
- * and returns the trimmed, uppercased extracted text.
+ * and returns both the trimmed text and overall confidence score.
  */
-export async function recognizeText(
+export async function recognizeWithConfidence(
   source: HTMLCanvasElement | string,
-): Promise<string> {
+): Promise<{ text: string; confidence: number }> {
   const worker = await getWorker();
   const { data } = await worker.recognize(source);
 
@@ -46,7 +47,20 @@ export async function recognizeText(
     confidence: data.confidence,
   });
 
-  return data.text.trim().toUpperCase();
+  return {
+    text: data.text.trim(),
+    confidence: Math.round(data.confidence ?? 0),
+  };
+}
+
+/**
+ * Runs OCR on an image source and returns the trimmed, uppercased text.
+ */
+export async function recognizeText(
+  source: HTMLCanvasElement | string,
+): Promise<string> {
+  const { text } = await recognizeWithConfidence(source);
+  return text.toUpperCase();
 }
 
 /**
