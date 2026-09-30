@@ -1,65 +1,64 @@
-// ─── Camera Service (Stage 1) ───────────────────────────────────────────────
-// Wraps @capacitor/camera for native shutter access.
-// Falls back to an HTML <input type="file"> capture for browser/dev.
+// ─── Camera Service ─────────────────────────────────────────────────────────
+// Live video stream via getUserMedia — no native picker, no "Use Photo" dialog.
 
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { Capacitor } from '@capacitor/core';
+let activeStream: MediaStream | null = null;
 
-export interface CaptureResult {
-  /** Local file URI (capacitor) or object URL (web fallback) */
-  imageUri: string;
-  /** Raw blob for EXIF + OCR processing */
-  blob: Blob;
+/**
+ * Starts the rear camera and attaches it to a <video> element.
+ * Returns the stream so it can be stopped later.
+ */
+export async function startCamera(videoEl: HTMLVideoElement): Promise<MediaStream> {
+  // Stop any existing stream
+  stopCamera();
+
+  const stream = await navigator.mediaDevices.getUserMedia({
+    video: {
+      facingMode: { ideal: 'environment' }, // rear camera
+      width: { ideal: 1920 },
+      height: { ideal: 1080 },
+    },
+    audio: false,
+  });
+
+  activeStream = stream;
+  videoEl.srcObject = stream;
+  await videoEl.play();
+  return stream;
 }
 
 /**
- * Opens the native camera, captures a photo, and returns both
- * the local URI and the raw Blob for downstream processing.
+ * Captures the current video frame as a Blob (JPEG).
+ * Returns both a blob (for EXIF/OCR) and an object URL.
  */
-export async function capturePhoto(): Promise<CaptureResult> {
-  if (Capacitor.isNativePlatform()) {
-    return captureNative();
-  }
-  return captureWeb();
-}
+export async function captureFrame(videoEl: HTMLVideoElement): Promise<{
+  imageUri: string;
+  blob: Blob;
+}> {
+  const canvas = document.createElement('canvas');
+  canvas.width = videoEl.videoWidth;
+  canvas.height = videoEl.videoHeight;
 
-// ── Native (Capacitor) path ─────────────────────────────────────────────────
+  const ctx = canvas.getContext('2d')!;
+  ctx.drawImage(videoEl, 0, 0);
 
-async function captureNative(): Promise<CaptureResult> {
-  const photo = await Camera.getPhoto({
-    quality: 90,
-    resultType: CameraResultType.Uri,
-    source: CameraSource.Camera,
-    correctOrientation: true,
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error('Frame capture failed'))),
+      'image/jpeg',
+      0.92,
+    );
   });
 
-  const imageUri = photo.webPath ?? photo.path ?? '';
-  const response = await fetch(imageUri);
-  const blob = await response.blob();
-
+  const imageUri = URL.createObjectURL(blob);
   return { imageUri, blob };
 }
 
-// ── Web fallback (file input) ───────────────────────────────────────────────
-
-function captureWeb(): Promise<CaptureResult> {
-  return new Promise((resolve, reject) => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.capture = 'environment'; // rear camera on mobile browsers
-
-    input.onchange = () => {
-      const file = input.files?.[0];
-      if (!file) {
-        reject(new Error('No file selected'));
-        return;
-      }
-      const imageUri = URL.createObjectURL(file);
-      resolve({ imageUri, blob: file });
-    };
-
-    input.oncancel = () => reject(new Error('Camera capture cancelled'));
-    input.click();
-  });
+/**
+ * Stops the active camera stream.
+ */
+export function stopCamera(): void {
+  if (activeStream) {
+    activeStream.getTracks().forEach((t) => t.stop());
+    activeStream = null;
+  }
 }

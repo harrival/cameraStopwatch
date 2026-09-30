@@ -937,43 +937,84 @@ body {
   box-shadow: var(--shadow-card);
 }
 
-/* Capture-only layout: center the shutter vertically */
-.capture-only {
+/* ── Full-screen camera layout ─────────────────────────────────────────── */
+.camera-app {
+  overflow: hidden;
+}
+
+.camera-app .app-header {
+  display: none;  /* hide header in camera mode for full-screen */
+}
+
+.camera-viewport {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+}
+
+.camera-video {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 20px calc(env(safe-area-inset-bottom, 16px) + 20px);
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6) 40%, rgba(0, 0, 0, 0.8));
+}
+
+.camera-hint {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.04em;
+}
+
+.camera-error {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 40px;
 }
 
-.capture-only .controls-section {
-  margin-bottom: 0;
-  width: 100%;
-  max-width: 360px;
+.camera-error-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.camera-error-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 6px;
 }
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .add-player-form {
-    flex-direction: column;
-  }
-
-  .timing-table {
-    font-size: 0.78rem;
-  }
-
-  .timing-table th,
-  .timing-table td {
-    padding: 8px 10px;
-  }
-
   .shutter-btn {
-    width: 96px;
-    height: 96px;
+    width: 80px;
+    height: 80px;
   }
 
   .shutter-inner {
-    width: 70px;
-    height: 70px;
+    width: 58px;
+    height: 58px;
   }
 }
+
